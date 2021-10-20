@@ -1,5 +1,6 @@
 ---
 title: "Lab 7: GitHub"
+class: "BGGN213 Bioinformatics class at UCSD"
 author: "Taylor Darby"
 date: "10/20/2021"
 output: github_document
