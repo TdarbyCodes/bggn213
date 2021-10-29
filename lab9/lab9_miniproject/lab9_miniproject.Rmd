@@ -219,8 +219,8 @@ wisc.hclust <- hclust(data.dist, method = "complete")
 ### At about a height of 19 the clustering model has 4 clusters.
 
 ```{r}
-plot(wisc.hclust)
-abline(h=19 , col="red", lty=2)
+plot(wisc.hclust, main="Complete")
+abline(h=19, col="red", lty=2)
 ```
 
 Use 'cutree()' to cut the tree so that it has 4 clusters. Assign the output to the variable wisc.hclust.clusters.
@@ -233,12 +233,126 @@ table(wisc.hclust.clusters, diagnosis)
 
 > **Q12.** Can you find a better cluster vs diagnoses match by cutting into a different number of clusters between 2 and 10?
 
+### Four clusters seems to be the best, but 6 clusters results in a third, very small group of 12 benign cells.
 
+```{r}
+wisc.hclust.clusters <- cutree(wisc.hclust, k = 6)
+table(wisc.hclust.clusters, diagnosis)
+
+```
 
 ## Using different methods
 
 > **Q13.** Which method gives your favorite results for the same 'data.dist' dataset? Explain your reasoning.
 
+### I think the 'ward.D2' is the best method because we are plotting PCA results and 'ward.D2' clusters based on variance (is based on multidimensional variance) like PCA
+
+```{r}
+# "Single" method cut at 4 clusters
+wisc.hclust.single <- hclust(data.dist, method = "single")
+plot(wisc.hclust.single, main="Single")
+abline(h=8.1 , col="red", lty=2)
+```
+
+```{r}
+# "Average" method cut at 4 clusters
+wisc.hclust.average <- hclust(data.dist, method = "average")
+plot(wisc.hclust.average, main="Average")
+abline(h=14 , col="red", lty=2)
+```
+
+```{r}
+# "Ward.D2" method cut at 4 clusters
+wisc.hclust.ward <- hclust(data.dist, method = "ward.D2")
+plot(wisc.hclust.ward, main="Ward.D2")
+abline(h=32.5 , col="red", lty=2)
+```
+
+> **Q14.** SKIP
+
+# Started this section of Lab 9 the folowing class Oct. 29, 2021
+
+## 5. Combining methods
+
+I will use 4 PCs this time and 'hclust()' and 'dist()' as input
+
+```{r}
+wisc.pr.hclust <- hclust(dist(wisc.pr$x[,1:4]), method="ward.D2")
+plot(wisc.pr.hclust, main="90% of the Variable Data")
+abline(h=80 , col="red", lty=2)
+```
+
+
+Let's find our cluster membership vector by cutting this tree into k=2 groups.
+
+```{r}
+# two main branches of or dendrogram indicating two main clusters - maybe these are malignant and benign?
+grps <- cutree(wisc.pr.hclust, k=2)
+table(grps)
+```
+
+Now let's compare to the expert M and B vector
+
+```{r}
+table(diagnosis)
+```
+
+> **Q15.** How well does the newly created model with four clusters separate out the two diagnoses?
+
+We can do a cross-table by giving the 'table()' function to two inputs.
+
+```{r}
+table(grps, diagnosis)
+```
+
+
+> **Q16.** How well do the k-means and hierarchical clustering models you created in previous sections (i.e. before PCA) do in terms of separating the diagnoses? Again, use the table() function to compare the output of each model (wisc.km$cluster and wisc.hclust.clusters) with the vector containing the actual diagnoses.
+
+
+
+## 6. Sensitivity/Specificity
+
+**Accuracy:** essentially how many did we get correct?
+
+```{r}
+(165+351) / nrow(wisc.data)
+```
+
+**Sensitivity** refers to a test’s ability to correctly detect ill patients who do have the condition. In our example here the sensitivity is the total number of samples in the cluster identified as predominantly malignant (cancerous) divided by the total number of known malignant samples. In other words: TP/(TP+FN).
+
+```{r}
+(165/(165+6))
+```
+
+**Specificity** relates to a test’s ability to correctly reject healthy patients without a condition. In our example specificity is the proportion of benign (not cancerous) samples in the cluster identified as predominantly benign that are known to be benign. In other words: TN/(TN+FN).
+
+```{r}
+(351/(351+47))
+```
+
+> **Q17.** Which of your analysis procedures resulted in a clustering model with the best specificity? How about sensitivity?
+
+
+## 7. Prediction
+
+We will use the predict() function that will take our PCA model from before and new cancer cell data and project that data onto our PCA space.
+
+```{r}
+#url <- "new_samples.csv"
+url <- "https://tinyurl.com/new-samples-CSV"
+new <- read.csv(url)
+npc <- predict(wisc.pr, newdata=new)
+npc
+```
+
+Now add these new samples to our PCA plot
+```{r}
+plot(wisc.pr$x[,1:2], col=diagnosis)
+points(npc[,1], npc[,2], col="blue", pch=16, cex=3)
+text(npc[,1], npc[,2], c(1,2), col="white")
+```
+
+> **Q18.** Which of these new patients should we prioritize for follow up based on your results?
 
 
 
