@@ -179,12 +179,16 @@ fviz_eig(wisc.pr, addlabels = TRUE)
 
 > **Q9.** For the first principal component, what is the component of the loading vector (i.e. wisc.pr$rotation[,1]) for the feature concave.points_mean?
 
+### -0.2608538
+
 ```{r}
 # call the first column of row "concave.points_mean" from the "rotation" dataset of 'wisc.pr'
 wisc.pr$rotation["concave.points_mean",1]
 ```
 
 > **Q10.** What is the minimum number of principal components required to explain 80% of the variance of the data?
+
+### 4
 
 There are four PCs with less than 80% variance of the data. That means it takes 5 PCs to explain 80% or more of the variance of the data.
 ```{r}
@@ -268,7 +272,7 @@ plot(wisc.hclust.ward, main="Ward.D2")
 abline(h=32.5 , col="red", lty=2)
 ```
 
-> **Q14.** SKIP
+> **Q14.** (OPTIONAL) - SKIPPED
 
 # Started this section of Lab 9 the folowing class Oct. 29, 2021
 
@@ -299,6 +303,8 @@ table(diagnosis)
 
 > **Q15.** How well does the newly created model with four clusters separate out the two diagnoses?
 
+### Very well. See table below.
+
 We can do a cross-table by giving the 'table()' function to two inputs.
 
 ```{r}
@@ -308,7 +314,7 @@ table(grps, diagnosis)
 
 > **Q16.** How well do the k-means and hierarchical clustering models you created in previous sections (i.e. before PCA) do in terms of separating the diagnoses? Again, use the table() function to compare the output of each model (wisc.km$cluster and wisc.hclust.clusters) with the vector containing the actual diagnoses.
 
-### I didn't do the optional k-means section but here you can see 
+### I didn't do the optional k-means section but here you can see before ward.D2 we need to generate 4 groups before seeing separation. After ward.D2 the separation is clearer.
 
 ```{r}
 table(wisc.hclust.clusters, diagnosis)
@@ -372,7 +378,7 @@ text(npc[,1], npc[,2], c(1,2), col="white")
 
 > **Q18.** Which of these new patients should we prioritize for follow up based on your results?
 
-I would follow up with patient 2 because the analysis predicted their test results were consistent with the malignant profile according to our previous PCA analysis.
+### I would follow up with patient 2 because the analysis predicted their test results were consistent with the malignant profile according to our previous PCA analysis.
 
 ```{r}
 sessionInfo()
