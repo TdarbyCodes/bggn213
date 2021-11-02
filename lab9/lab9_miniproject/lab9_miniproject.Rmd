@@ -95,7 +95,7 @@ summary(wisc.pr)
 
 > **Q6.** How many principal components (PCs) are required to describe at least 90% of the original variance in the data?
 
-### Seven. In PC7 at least 70% of the original variance is described
+### Seven. In PC7 at least 90% of the original variance is described
 
 ## Interpreting PCA results
 
@@ -110,10 +110,10 @@ biplot(wisc.pr)
 
 Let's find a solution to this:
 ```{r}
-# Generate a more standard scatter plot of each observation along principal components 1 and 2 and color the points by the diagnosis.
+# Generate a more standard scatter plot of each observation along principal components 1 and 2 and color the points by the diagnosis (Malignant = red and benign = black)
 
-plot(wisc.pr$x, col=diagnosis,
-     xlab="PC1", ylab="PC2")
+plot(wisc.pr$x, col=diagnosis, xlab="PC1", ylab="PC2")
+  
 ```
 
 > **Q8.** Generate a similar plot for principal components 1 and 3. What do you notice about these plots?
@@ -236,8 +236,8 @@ table(wisc.hclust.clusters, diagnosis)
 ### Four clusters seems to be the best, but 6 clusters results in a third, very small group of 12 benign cells.
 
 ```{r}
-wisc.hclust.clusters <- cutree(wisc.hclust, k = 6)
-table(wisc.hclust.clusters, diagnosis)
+wisc.hclust.clusters.2 <- cutree(wisc.hclust, k = 6)
+table(wisc.hclust.clusters.2, diagnosis)
 
 ```
 
@@ -308,6 +308,12 @@ table(grps, diagnosis)
 
 > **Q16.** How well do the k-means and hierarchical clustering models you created in previous sections (i.e. before PCA) do in terms of separating the diagnoses? Again, use the table() function to compare the output of each model (wisc.km$cluster and wisc.hclust.clusters) with the vector containing the actual diagnoses.
 
+### I didn't do the optional k-means section but here you can see 
+
+```{r}
+table(wisc.hclust.clusters, diagnosis)
+table(grps, diagnosis)
+```
 
 
 ## 6. Sensitivity/Specificity
@@ -315,22 +321,34 @@ table(grps, diagnosis)
 **Accuracy:** essentially how many did we get correct?
 
 ```{r}
+# pre-ward.d2
+(165+343) / nrow(wisc.data)
+
+# post-ward.d2
 (165+351) / nrow(wisc.data)
 ```
+
+> **Q17.** Which of your analysis procedures resulted in a clustering model with the best specificity? How about sensitivity?
+
+### PCA scaled and grouped into 2 groups using ward.D2 is more specific, but not as sensitive as the data before ward.D2 analysis.
 
 **Sensitivity** refers to a test’s ability to correctly detect ill patients who do have the condition. In our example here the sensitivity is the total number of samples in the cluster identified as predominantly malignant (cancerous) divided by the total number of known malignant samples. In other words: TP/(TP+FN).
 
 ```{r}
+# pre-ward.d2
+(165/(165+12))
+# post-ward.d2
 (165/(165+6))
 ```
 
-**Specificity** relates to a test’s ability to correctly reject healthy patients without a condition. In our example specificity is the proportion of benign (not cancerous) samples in the cluster identified as predominantly benign that are known to be benign. In other words: TN/(TN+FN).
+**Specificity** relates to a test’s ability to correctly reject healthy patients without a condition. In our example specificity is the proportion of benign (not cancerous) samples in the cluster identified as predominantly benign that are known to be benign. In other words: TN/(TN+FP).
 
 ```{r}
+# pre-ward.d2
+(343/(343+40))
+# post-ward.d2
 (351/(351+47))
 ```
-
-> **Q17.** Which of your analysis procedures resulted in a clustering model with the best specificity? How about sensitivity?
 
 
 ## 7. Prediction
@@ -354,6 +372,9 @@ text(npc[,1], npc[,2], c(1,2), col="white")
 
 > **Q18.** Which of these new patients should we prioritize for follow up based on your results?
 
+I would follow up with patient 2 because the analysis predicted their test results were consistent with the malignant profile according to our previous PCA analysis.
 
-
+```{r}
+sessionInfo()
+```
 
