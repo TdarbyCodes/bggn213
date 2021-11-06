@@ -23,7 +23,22 @@ First tell Git who you are:
 >git config --global user.name "TDarbyCodes"
 >git config --global user.email "tdarby@ucsd.edu"
 
+## Created a new repository in Github
+copied the URL and created a new project linked to the new repository
+
 ## Created a new project and clicked "new git repository"
-Created a new R Markdown file
-Staged R markdown file by checking the box next to the R markdown file in the "Git tab"
-Committed R markdown file
+Clicked "version control"
+Entered URL in first field
+
+## Learned how to update each of the locations
+1) Add/save
+2) Stage
+3) Commit
+4) Push
+5) In other source "Pull"
+
+## Learned to add other local files to repository
+1) Move files into working folder on local computer
+2) Files will show up on Git tab
+3) Stage files, Commit, Push
+4) On GitHub.com refresh and they should show up

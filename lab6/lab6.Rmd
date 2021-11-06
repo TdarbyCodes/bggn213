@@ -2,7 +2,7 @@
 title: 'Lab 6: R Functions'
 author: "Taylor Darby"
 date: "10/19/2021"
-output: pdf_document
+output: github_document
 ---
 
 Here we will write a function to grade some student homework.
@@ -211,3 +211,14 @@ grade2 <- function(x, drop.lowest=TRUE) {
 }}
 ```
 
+Added one last function in our 10/20/2021 class
+```{r}
+grade2 <- function(x, drop.lowest=TRUE) {
+  x <- as.numeric(x)
+  x[is.na(x)] = 0
+  if(drop.lowest) {
+  mean(x[-which.min(x)])
+  } else{
+  mean(x)
+}}
+```
