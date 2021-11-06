@@ -1,0 +1,38 @@
+---
+title: "lab7"
+author: "Taylor Darby"
+date: "10/20/2021"
+output: html_document
+---
+
+```{r}
+grade2 <- function(x, drop.lowest=TRUE) {
+  x <- as.numeric(x)
+  x[is.na(x)] = 0
+  if(drop.lowest) {
+  mean(x[-which.min(x)])
+  } else{
+  mean(x)
+}}
+```
+
+Created a Github account using username "TDarbyCodes"
+
+Connect RStudio to Github account
+```{r}
+install.packages("usethis")
+library(usethis)
+create_github_token()
+```
+
+Save Github credentials
+```{r}
+install.packages("gitcreds")
+library(gitcreds)
+gitcreds_set()
+```
+
+Configure Git in the Terminal tab
+First tell Git who you are:
+>git config --global user.name "TDarbyCodes"
+>git config --global user.email "tdarby@ucsd.edu"
