@@ -1,0 +1,7 @@
+---
+title: 'Unix Shell: Launching AWS instances'
+author: "Taylor Darby"
+date: "11/10/2021"
+output: pdf_document
+---
+
