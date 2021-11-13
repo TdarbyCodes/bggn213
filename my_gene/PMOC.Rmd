@@ -1,0 +1,31 @@
+---
+title: 'Find A Gene Project: POMC'
+author: "Taylor Darby"
+date: "11/12/2021"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+**[Q7]** Generate a sequence identity based heatmap of your aligned sequences using R. If necessary convert your sequence alignment to the ubiquitous FASTA format (Seaview can read in clustal format and “Save as” FASTA format for example). Read this FASTA format alignment into R with the help of functions in the Bio3D package. Calculate a sequence identity matrix (again using a function within the Bio3D package). Then generate a heatmap plot and add to your report. Do make sure your labels are visible and not cut at the figure margins. 
+
+```{r}
+# I will use the function 'seqaln()' which requires a MUSCLE download. Downloaded MUSCLE in the 'Terminal' tab using: curl -o "muscle.exe" "https://www.drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86win32.exe"
+# I will also use the bio3d package which is already installed
+library(bio3d)
+POMC <- read.fasta("POMC_protein.fasta")
+```
+
+```{r}
+POMC <- read.fasta("POMC_protein.fasta")
+POMC_align <- seqaln(POMC)
+POMC_align
+POMC_seqID <- seqidentity(POMC_align)
+```
+
+
+```{r}
+POMC_heatmap <- heatmap(POMC_seqID, main = "Heatmap of Aligned Protein Sequences", margins = c(7,2))
+POMC_heatmap
+```
+
