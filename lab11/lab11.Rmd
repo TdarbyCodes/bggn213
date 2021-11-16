@@ -94,6 +94,7 @@ head(pdb$atom)
 Let's do a quick bioinformatics prediction of protein dynamics (flexibility). We'll use the Normal Mode Analysis (NMA) function, a prediction of the conformational variability and intrinsic dynamics of this protein.
 
 ```{r}
+library(bio3d)
 pdb <- read.pdb("1hel")
 modes <- nma(pdb)
 plot(modes)

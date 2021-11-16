@@ -29,3 +29,9 @@ POMC_heatmap <- heatmap(POMC_seqID, margins = c(7,2))
 POMC_heatmap
 ```
 
+```{r}
+library(bio3d)
+POMC_pdb <- read.pdb(POMC.pdb)
+modes <- nma(POMC_pdb)
+```
+
