@@ -31,7 +31,7 @@ POMC_heatmap
 
 ```{r}
 library(bio3d)
-POMC_pdb <- read.pdb(POMC.pdb)
+POMC_pdb <- read.pdb("POMC.pdb")
 modes <- nma(POMC_pdb)
 ```
 

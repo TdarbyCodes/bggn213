@@ -1,0 +1,34 @@
+---
+title: 'Lab 15: Transcriptomics and the analysis of RNA-Seq data'
+author: "Taylor Darby"
+date: "11/17/2021"
+output: pdf_document
+---
+
+# 1. Bioconductor and DESeq2 setup
+
+## Installed Bioconductor and DEseq2 using:
+install.packages("BiocManager")
+BiocManager::install()
+BiocManager::install("DESeq2")
+
+### To double check the packages were installed use:
+
+```{r}
+library(BiocManager)
+library(DESeq2)
+```
+
+
+# 2. Import countData and colData
+
+```{r}
+counts <- read.csv("airway_scaledcounts.csv", row.names = 1)
+metadata <- read.csv("airway_metadata.csv")
+head(counts)
+head(metadata)
+```
+
+
+
+
