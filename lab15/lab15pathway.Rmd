@@ -144,6 +144,100 @@ write.csv(res, file="deseq_results.csv")
 
 # Section 2. Pathway Analysis
 
+The gageData package has pre-compiled databases mapping genes to KEGG pathways and GO terms for common organisms. kegg.sets.hs is a named list of 229 elements. Each element is a character vector of member gene Entrez IDs for a single KEGG pathway. (See also go.sets.hs). The sigmet.idx.hs is an index of numbers of signaling and metabolic pathways in kegg.set.gs. In other words, KEGG pathway include other types of pathway definitions, like "Global Map" and "Human Diseases", which may be undesirable in a particular pathway analysis. Therefore, kegg.sets.hs[sigmet.idx.hs] gives you the "cleaner" gene sets of signaling and metabolic pathways only.
+
+```{r}
+# First we need to do our one time install of these required bioconductor packages:
+# BiocManager::install( c("pathview", "gage", "gageData") )
+
+# For old vesrsions of R only (R < 3.5.0)!
+#source("http://bioconductor.org/biocLite.R")
+#biocLite( c("pathview", "gage", "gageData") )
+library(pathview)
+library(gage)
+library(gageData)
+```
+
+```{r}
+# Import data:
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+
+The main gage() function requires a named vector of fold changes, where the names of the values are the Entrez gene IDs.
+
+Note that we used the mapIDs() function above to obtain Entrez gene IDs (stored in res$entrez) and we have the fold change results from DESeq2 analysis (stored in res$log2FoldChange).
+
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+
+# Now let's run the 'gage()' analysis:
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+
+attributes(keggres)
+```
+
+```{r}
+# Look at the first few down (less) pathways
+head(keggres$less)
+
+# Let's try out the pathview() function from the pathview package to make a pathway plot with our RNA-Seq expression results shown in color.
+
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+```{r}
+## Focus on top 5 upregulated pathways here for demo purposes only
+keggrespathways <- rownames(keggres$greater)[1:5]
+
+# Extract the 8 character long IDs part of each string
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id=keggresids, species="hsa")
+```
+
+![](hsa04110.pathview.png)
+
+![](hsa04640.pathview.png)
+
+![](hsa04640.pathview.png)
+
+![](hsa00140.pathview.png)
+
+![](hsa04142.pathview.png)
+
+![](hsa04330.pathview.png)
+
+Can you do the same procedure as above to plot the pathview figures for the top 5 down-regulated pathways?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
