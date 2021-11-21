@@ -1,0 +1,152 @@
+---
+title: "Lab 15: RNAseq Pathway Analysis"
+author: "Taylor Darby"
+date: "11/19/2021"
+output: pdf_document
+---
+
+## Background Notes:
+
+### 1. Data import
+### 2. PCA (for quality control)
+### 3. DESeq analysis
+
+# Section 1. Differential Expression Analysis
+
+## 1. Data import
+
+```{r}
+# Load DESeq and our files
+library(DESeq2)
+metaFile <- "GSE37704_metadata.csv"
+countFile <- "GSE37704_featurecounts.csv"
+
+# Import metadata and take a peak
+colData = read.csv(metaFile, row.names=1)
+head(colData)
+
+# Import countdata
+countData = read.csv(countFile, row.names=1)
+head(countData)
+```
+
+Complete the code below to remove the troublesome first column from countData
+
+```{r}
+countmatrix <- as.matrix(countData[,2:7])
+head(countmatrix)
+```
+
+Complete the code below to filter countData to exclude genes (i.e. rows) where we have 0 read count across all samples (i.e. columns).
+
+Tip: What will rowSums() of countData return and how could you use it in this context?
+
+```{r}
+# Filter count data where you have 0 read count across all samples.
+countmatrix = countmatrix[rowSums(countmatrix) != 0, ]
+head(countmatrix)
+```
+
+There are `r nrow(countmatrix)` genes left in the countData.
+
+## 2. PCA (for quality control)
+
+### Our sample-level QC allows us to see how well our replicates cluster together, as well as, observe whether our experimental condition represents the major source of variation in the data. Performing sample-level QC can also identify any sample outliers, which may need to be explored further to determine whether they need to be removed prior to DE analysis.
+
+```{r}
+# Perform PCA analysis on transformed data
+countpca <- prcomp(t(countmatrix), scale = T)
+head(countpca$x)
+
+# plot transformed PCA
+plot(countpca$x[,1:2])
+
+```
+
+
+## 3. DESeq analysis
+
+```{r}
+dds = DESeqDataSetFromMatrix(countData=countmatrix,
+                             colData=colData,
+                             design=~condition)
+dds = DESeq(dds)
+res <- results(dds)
+```
+
+Call the summary() function on your results to get a sense of how many genes are up or down-regulated at the default 0.1 p-value cutoff.
+
+```{r}
+head(res)
+```
+
+
+```{r}
+plot( res$log2FoldChange, -log(res$padj) )
+
+```
+
+Improve this plot by completing the below code, which adds color and axis labels
+
+```{r}
+# Make a color vector for all genes
+mycols <- rep("gray", nrow(res))
+
+# Color red the genes with absolute fold change above 2
+mycols[ abs(res$log2FoldChange) > 2 ] <- "red"
+
+# Color blue those with adjusted p-value less than 0.01
+#  and absolute fold change more than 2
+inds <- (res$pvalue < 0.01) & (abs(res$log2FoldChange) > 2 )
+mycols[ inds ] <- "blue"
+
+plot( res$log2FoldChange, -log(res$padj), col=mycols, xlab="Log2(FoldChange)", ylab="-Log(P-value)" )
+```
+
+Use the mapIDs() function multiple times to add SYMBOL, ENTREZID and GENENAME annotation to our results by completing the code below.
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+
+columns(org.Hs.eg.db)
+```
+
+
+```{r}
+res$symbol = mapIds(org.Hs.eg.db,
+                    keys=rownames(res), 
+                    keytype="ENSEMBL",
+                    column="SYMBOL",
+                    multiVals="first")
+
+res$entrez = mapIds(org.Hs.eg.db,
+                    keys=rownames(res),
+                    keytype="ENSEMBL",
+                    column="ENTREZID",
+                    multiVals="first")
+
+res$name =   mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="GENENAME",
+                    multiVals="first")
+
+head(res, 10)
+```
+
+Finally for this section let's reorder these results by adjusted p-value and save them to a CSV file in your current project directory.
+
+```{r}
+res = res[order(res$pvalue),]
+write.csv(res, file="deseq_results.csv")
+```
+
+# Section 2. Pathway Analysis
+
+
+
+
+
+
+
