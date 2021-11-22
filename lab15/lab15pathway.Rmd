@@ -15,7 +15,7 @@ output: pdf_document
 
 ## 1. Data import
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # Load DESeq and our files
 library(DESeq2)
 metaFile <- "GSE37704_metadata.csv"
@@ -30,14 +30,14 @@ countData = read.csv(countFile, row.names=1)
 head(countData)
 ```
 
-Complete the code below to remove the troublesome first column from countData
+**Question 1:** Complete the code below to remove the troublesome first column from countData
 
 ```{r}
 countmatrix <- as.matrix(countData[,2:7])
 head(countmatrix)
 ```
 
-Complete the code below to filter countData to exclude genes (i.e. rows) where we have 0 read count across all samples (i.e. columns).
+**Question 2:** Complete the code below to filter countData to exclude genes (i.e. rows) where we have 0 read count across all samples (i.e. columns).
 
 Tip: What will rowSums() of countData return and how could you use it in this context?
 
@@ -74,7 +74,7 @@ dds = DESeq(dds)
 res <- results(dds)
 ```
 
-Call the summary() function on your results to get a sense of how many genes are up or down-regulated at the default 0.1 p-value cutoff.
+**Question 3:** Call the summary() function on your results to get a sense of how many genes are up or down-regulated at the default 0.1 p-value cutoff.
 
 ```{r}
 head(res)
@@ -86,7 +86,7 @@ plot( res$log2FoldChange, -log(res$padj) )
 
 ```
 
-Improve this plot by completing the below code, which adds color and axis labels
+**Question 4:** Improve this plot by completing the below code, which adds color and axis labels
 
 ```{r}
 # Make a color vector for all genes
@@ -103,7 +103,7 @@ mycols[ inds ] <- "blue"
 plot( res$log2FoldChange, -log(res$padj), col=mycols, xlab="Log2(FoldChange)", ylab="-Log(P-value)" )
 ```
 
-Use the mapIDs() function multiple times to add SYMBOL, ENTREZID and GENENAME annotation to our results by completing the code below.
+**Question 5:** Use the mapIDs() function multiple times to add SYMBOL, ENTREZID and GENENAME annotation to our results by completing the code below.
 
 ```{r}
 library("AnnotationDbi")
@@ -135,7 +135,7 @@ res$name =   mapIds(org.Hs.eg.db,
 head(res, 10)
 ```
 
-Finally for this section let's reorder these results by adjusted p-value and save them to a CSV file in your current project directory.
+**Question 6:** Finally for this section let's reorder these results by adjusted p-value and save them to a CSV file in your current project directory.
 
 ```{r}
 res = res[order(res$pvalue),]
@@ -185,7 +185,7 @@ keggres = gage(foldchanges, gsets=kegg.sets.hs)
 attributes(keggres)
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # Look at the first few down (less) pathways
 head(keggres$less)
 
@@ -203,7 +203,7 @@ keggresids = substr(keggrespathways, start=1, stop=8)
 keggresids
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 pathview(gene.data=foldchanges, pathway.id=keggresids, species="hsa")
 ```
 
@@ -217,7 +217,7 @@ pathview(gene.data=foldchanges, pathway.id=keggresids, species="hsa")
 
 ![](up/hsa04640.pathview.png)
 
-Can you do the same procedure as above to plot the pathview figures for the top 5 down-regulated pathways?
+**Question 7:** Can you do the same procedure as above to plot the pathview figures for the top 5 down-regulated pathways?
 
 ```{r}
 ## Focus on top 5 downregulated pathways
@@ -228,7 +228,7 @@ keggresids2 = substr(keggrespathways2, start=1, stop=8)
 keggresids2
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 pathview(gene.data=foldchanges, pathway.id=keggresids2, species="hsa")
 ```
 
@@ -276,9 +276,18 @@ Then, to perform pathway analysis online go to the Reactome website (https://rea
 
 ![](Pathways.jpg)
 
-What pathway has the most significant “Entities p-value”? Do the most significant pathways listed match your previous KEGG results? What factors could cause differences between the two methods?
+**Question 8:** What pathway has the most significant “Entities p-value”? Do the most significant pathways listed match your previous KEGG results? What factors could cause differences between the two methods?
 
 ### The pathway with the most significant "Entities p-value" is the endosomal/vacuolar pathway
 
+# Section 5. GO online (OPTIONAL)
+
+**Question 9:** What pathway has the most significant “Entities p-value”? Do the most significant pathways listed match your previous KEGG results? What factors could cause differences between the two methods?
+
+# Session Information
+
+```{r}
+sessionInfo()
+```
 
 

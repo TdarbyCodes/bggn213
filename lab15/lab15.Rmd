@@ -41,13 +41,15 @@ all(colnames(counts) == metadata$id)
 
 **Q1.** How many genes are in this dataset?
 
+### There are `r nrow(counts)` genes in this dataset.
+
 ```{r}
 nrow(counts)
 ```
 
 **Q2.** How many ‘control’ cell lines do we have?
 
-### Four
+### There are `r count("control" == metadata$dex)` 'control' cell lines.
 
 ```{r}
 count("control" == metadata$dex)
@@ -56,7 +58,29 @@ count("control" == metadata$dex)
 
 # 3. Toy differential gene expression
 
+**Note: this analysis is for demonstration only. NEVER do differential expression analysis this way!**
+
 ### Compare "control" to "treated"
+
+```{r}
+# Find the control samples then calculate the mean counts per gene across these samples:
+control <- metadata[metadata[,"dex"]=="control",]
+control.counts <- counts[ ,control$id]
+control.mean <- rowSums( control.counts )/4 
+head(control.mean)
+```
+
+**Side-note:** An alternative way to do this same thing using the dplyr package from the tidyverse is shown below.
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+control <- metadata %>% filter(dex=="control")
+control.counts <- counts %>% select(control$id) 
+control.mean <- rowSums(control.counts)/4
+head(control.mean)
+```
+
+**Q3.** How would you make the above code in either approach more robust?
 
 ```{r}
 # first we need to access all the control columns in our 'metadata' data to access ids.
@@ -79,6 +103,8 @@ control.mean <- rowMeans(counts[,control.ids])
 head(control.mean)
 ```
 
+**Q4.** Follow the same procedure for the treated samples (i.e. calculate the mean per gene across drug treated samples and assign to a labeled vector called treated.mean)
+
 ```{r}
 # repeat the above for 'treated'
 
@@ -94,16 +120,10 @@ treated.mean <- rowMeans(counts[,treated.ids])
 head(treated.mean)
 ```
 
-**Q3.** How would you make the above code in either approach more robust?
-
-
-**Q4.** Follow the same procedure for the treated samples (i.e. calculate the mean per gene across drug treated samples and assign to a labeled vector called treated.mean)
-
-
 ```{r}
 ## We will combine our meancount data into a matrix for bookkeeping purposes
 meancounts <- data.frame(control.mean,treated.mean)
-meancounts
+head(meancounts)
 ```
 
 **Q5.** Create a scatter plot showing the mean of the treated samples against the mean of the control samples. Your plot should look something like the following.
@@ -159,19 +179,30 @@ We now have `r nrow(mycounts)` genes remaining.
 **Q8.** Using the up.ind vector above can you determine how many up regulated genes we have at the greater than 2 fc level? 
 
 ```{r}
+up.ind <- mycounts$log2fc > 2
+sum(up.ind)
+```
+
+
+```{r}
 # Determine the % genes that are upregulated (round to 2 sig figs)
 round((sum(mycounts$log2fc > +2) / nrow(mycounts))*100,2)
 ```
 
-There are `round((sum(mycounts$log2fc > +2) / nrow(mycounts))*100,2)` percent genes upregulated.
+### There are `r sum(up.ind)` genes upregulated. That makes `r round((sum(mycounts$log2fc > +2) / nrow(mycounts))*100,2)` percent genes upregulated.
 
 **Q9.** Using the down.ind vector above can you determine how many down regulated genes we have at the greater than 2 fc level? 
 
 ```{r}
-# Determine the % genes that are downregulated (round to 2 sig figs)
-round((sum(mycounts$log2fc > -2) / nrow(mycounts))*100, 2)
+down.ind <- mycounts$log2fc < (-2)
+sum(down.ind)
 ```
-There are `round((sum(mycounts$log2fc > -2) / nrow(mycounts))*100, 2)` percent genes downregulated.
+
+```{r}
+# Determine the % genes that are downregulated (round to 2 sig figs)
+round((sum(mycounts$log2fc < -2) / nrow(mycounts))*100, 2)
+```
+### There are `r sum(down.ind)` genes downregulated. That makes `r round((sum(mycounts$log2fc > -2) / nrow(mycounts))*100, 2)` percent genes downregulated.
 
 
 **Q10.** Do you trust these results? Why or why not?
@@ -181,7 +212,7 @@ There are `round((sum(mycounts$log2fc > -2) / nrow(mycounts))*100, 2)` percent g
 
 # 4. DESeq2 analysis
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # Load DESeq
 library(DESeq2)
 citation("DESeq2")
@@ -189,7 +220,7 @@ citation("DESeq2")
 
 ## Importing data
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 dds <- DESeqDataSetFromMatrix(countData=counts,
                               colData=metadata,
                               design=~dex)
@@ -198,7 +229,7 @@ dds
 
 ## DESeq analysis
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 dds <- DESeq(dds)
 ```
 
@@ -214,7 +245,7 @@ We want to add meaningful gene names to our dataset so we can make some sense of
 
 For this we will use two bioconductor packages, one does the work and is called **"Annotation Dbi"**, and the other contains the data we are going to map between and is called **"org.Hs.eg.db"**
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # install packages
 # BiocManager::install("AnnotationDbi")
 # BiocManager::install("org.Hs.eg.db")
@@ -226,6 +257,7 @@ library("org.Hs.eg.db")
 columns(org.Hs.eg.db)
 ```
 
+**Q11.** Run the mapIds() function two more times to add the Entrez ID and UniProt accession and GENENAME as new columns called res$entrez, res$uniprot and res$genename. **(We started at the end of this day then finished the next class before doing the pathway analysis)**
 
 ```{r}
 res$symbol <- mapIds(org.Hs.eg.db,
@@ -235,10 +267,6 @@ res$symbol <- mapIds(org.Hs.eg.db,
                      multiVals="first")
 head(res)
 ```
-
-**Q11.** Run the mapIds() function two more times to add the Entrez ID and UniProt accession and GENENAME as new columns called res$entrez, res$uniprot and res$genename.
-
-
 
 # 6. Data Visualization
 
@@ -285,6 +313,8 @@ data(kegg.sets.hs)
 head(kegg.sets.hs, 2)
 ```
 
+**Q11 Continued.** Run the mapIds() function two more times to add the Entrez ID and UniProt accession and GENENAME as new columns called res$entrez, res$uniprot and res$genename.
+
 Before we can use KEGG we need to get our gene identifiers in the correct format for KEGG, which is ENTREZ format in this case.
 
 ```{r}
@@ -330,20 +360,24 @@ head(keggres$less, 6)
 
 The 'pathview()' function will add our genes to a KEGG pathway as colored entries:
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 pathview(gene.data=foldchanges, pathway.id="hsa05310")
 ```
 
 ![](hsa05310.pathview.png)
 
-**Q12.** Can you do the same procedure as above to plot the pathview figures for the top 2 down-reguled pathways?
+**Q12.** Can you do the same procedure as above to plot the pathview figures for the top 2 down-regulated pathways?
 
+```{r message=FALSE, warning=FALSE}
+library(stringr)
+kres.matrix <- as.matrix(keggres$less)
+kres.rnames <- rownames(kres.matrix)
+kres.splitnames <- str_split_fixed(kres.rnames, " ", 2)
+pathview(gene.data=foldchanges, pathway.id=kres.splitnames[1:2,1])
+```
 
+![](hsa05332.pathview.png)
 
-
-
-
-
-
+![](hsa04940.pathview.png)
 
 
