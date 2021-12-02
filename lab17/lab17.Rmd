@@ -1,0 +1,71 @@
+---
+title: 'Lab 17: Vax Mini Project'
+author: "Taylor Darby"
+date: "11/27/2021"
+output: pdf_document
+---
+
+# Getting Started
+
+```{r}
+# Import vaccination data
+vax <- read.csv("zip_data.csv")
+head(vax)
+head(sort(vax[,1]))
+tail(sort(vax[,1]))
+```
+
+**Q1.** What column details the total number of people fully vaccinated? 
+
+### Column 9 labeled 'persons_fully_vaccinated'
+
+**Q2.** What column details the Zip code tabulation area? 
+
+### Column 2 labeled 'zip_code_tabulation_area'
+
+**Q3.** What is the earliest date in this dataset? 
+
+### 2021-01-05
+
+**Q4.** What is the latest date in this dataset?
+
+### 2021-11-23
+
+```{r}
+skimr::skim(vax)
+```
+
+**Q5.** How many numeric columns are in this dataset? 
+
+### There are 9 numeric columns in this dataset.
+
+**Q6.** Note that there are “missing values” in the dataset. How many NA values there in the persons_fully_vaccinated column? 
+
+### There are `r sum(is.na(vax$persons_fully_vaccinated))` missing values in the 'persons_fully_vaccinated' column.
+
+```{r}
+sum(is.na(vax$persons_fully_vaccinated))
+```
+
+**Q7.** What percent of persons_fully_vaccinated values are missing (to 2 significant figures)? 
+
+###
+
+**Q8.** [Optional]: Why might this data be missing?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

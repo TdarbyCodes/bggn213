@@ -1,0 +1,4 @@
+"","queryid","subjectids","identity","alignmentlength","mismatches","gapopens","q.start","q.end","s.start","s.end","evalue","bitscore","positives","mlog.evalue","pdb.id","acc"
+"1","Query_261385","4IZ6_A",80,5,1,0,3,7,379,383,7.9,21.4,100,-2.06686275947298,"4IZ6_A","4IZ6_A"
+"2","Query_261385","3RG2_A",80,5,1,0,3,7,361,365,7.9,21.4,100,-2.06686275947298,"3RG2_A","3RG2_A"
+"3","Query_261385","6IYK_A",80,5,1,0,3,7,359,363,7.9,21.4,100,-2.06686275947298,"6IYK_A","6IYK_A"

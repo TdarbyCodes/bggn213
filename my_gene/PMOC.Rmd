@@ -2,10 +2,65 @@
 title: 'Find A Gene Project: POMC'
 author: "Taylor Darby"
 date: "11/12/2021"
-output:
-  pdf_document: default
-  word_document: default
+output: pdf_document
 ---
+
+**[Q6]** Create a phylogenetic tree, using either a parsimony or distance-based approach. Bootstrapping and tree rooting are optional. Use “simple phylogeny” online from the EBI or any respected phylogeny program (such as MEGA, PAUP, or Phylip). Paste an image of your Cladogram or tree output in your report. 
+
+```{r message=FALSE, warning=FALSE}
+#install.packages("remotes")
+#remotes::install_github("GuangchuangYu/treeio")
+#install.packages("seqinr")
+#BiocManager::install("ggtree")
+#BiocManager::install("DECIPHER")
+#install.packages("ape")
+#install.packages("adegenet")
+
+#library(seqinr)
+library(adegenet)
+library(ape)
+library(ggtree)
+library(DECIPHER)
+library(viridis)
+library(ggplot2)
+library(phangorn)
+```
+
+```{r}
+read <- read.aa("POMC_aligned.fasta", format = "fasta")
+read_phyDat <- phyDat(read, type = "AA")
+read.dist <- dist.ml(read_phyDat, model="JC69")
+POMC_UPGMA <- upgma(read.dist)
+POMC_optim <- optim.parsimony(POMC_UPGMA, read_phyDat)
+plot(POMC_optim)
+```
+
+Other options:
+```{r}
+#fit <- pml(POMC_UPGMA,read_phyDat)
+#fitB <- optim.pml(fit, model = "Blosum62")
+#fitBoot <- bootstrap.pml(fitB, bs=1000, optNni=TRUE, control = pml.control(trace=0))
+#plotBS(midpoint(fitB$tree), fitBoot, type="p", cex = 0.5)
+```
+
+```{r}
+#seqs <- readAAStringSet("POMC_protein.fasta", format = "fasta")
+#aligned <- AlignSeqs(seqs)
+#writeXStringSet(aligned, file="POMC_aligned.fasta")
+#tree.data <- read.alignment("POMC_aligned.fasta", format = "fasta")
+#tree.dist <- dist.alignment(tree.data, matrix = "identity")
+#temp.dist <- as.data.frame(as.matrix(tree.dist))
+#table.paint(temp.dist, cleg=.75) + scale_color_viridis()
+```
+
+```{r}
+#nj.tree <- nj(tree.dist)
+#nj.tree <- ladderize(nj.tree)
+#new.nj <- nj.tree
+#new.nj$tip.label <- aligned@ranges@NAMES
+#msaplot(p=ggtree(new.nj, options(ignore.negative.edge=TRUE)), fasta="POMC_aligned.fasta", offset = 0.1) + scale_fill_viridis_d(alpha = 0.8) + geom_tiplab(size=2.25)
+```
+
 
 **[Q7]** Generate a sequence identity based heatmap of your aligned sequences using R. If necessary convert your sequence alignment to the ubiquitous FASTA format (Seaview can read in clustal format and “Save as” FASTA format for example). Read this FASTA format alignment into R with the help of functions in the Bio3D package. Calculate a sequence identity matrix (again using a function within the Bio3D package). Then generate a heatmap plot and add to your report. Do make sure your labels are visible and not cut at the figure margins. 
 
@@ -13,25 +68,78 @@ output:
 # I will use the function 'seqaln()' which requires a MUSCLE download. Downloaded MUSCLE in the 'Terminal' tab using: curl -o "muscle.exe" "https://www.drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86win32.exe"
 # I will also use the bio3d package which is already installed
 library(bio3d)
-POMC <- read.fasta("POMC_protein.fasta")
-```
-
-```{r}
-POMC <- read.fasta("POMC_protein.fasta")
-POMC_align <- seqaln(POMC)
-POMC_align
+POMC_fasta <- read.fasta("POMC_protein.fasta")
+POMC_align <- seqaln(POMC_fasta)
 POMC_seqID <- seqidentity(POMC_align)
+POMC_seqID
 ```
 
-
 ```{r}
-POMC_heatmap <- heatmap(POMC_seqID, margins = c(7,2))
+POMC_heatmap <- heatmap(POMC_seqID, Rowv= NA, col= cm.colors(256), scale = "none", main = "Sequence Identity Based Heatmap of POMC", margin = c(7,5) )
+
 POMC_heatmap
 ```
 
 ```{r}
-library(bio3d)
-POMC_pdb <- read.pdb("POMC.pdb")
-modes <- nma(POMC_pdb)
+# install.packages("pheatmap")
+library(pheatmap)
+pheatmap(POMC_seqID, scale = "none", main = "Sequence Identity-Based Heatmap of POMC")
 ```
+
+**[Q8]** Using R/Bio3D (or an online blast server if you prefer), search the main protein structure database for the most similar atomic resolution structures to your aligned sequences. List the top 3 unique hits (i.e. not hits representing different chains from the same structure) along with their Evalue and sequence identity to your query. Please also add annotation details of these structures. For example include the annotation terms PDB identifier (structureId), Method used to solve the structure (experimentalTechnique), resolution (resolution), and source organism (source). HINT: You can use a single sequence from your alignment or generate a consensus sequence from your alignment using the Bio3D function consensus(). The Bio3D functions blast.pdb(), plot.blast() and pdb.annotate() are likely to be of most relevance for completing this task. Note that the results of blast.pdb() contain the hits PDB identifier (or pdb.id) as well as Evalue and identity. The results of pdb.annotate() contain the other annotation terms noted above. Note that if your consensus sequence has lots of gap positions then it will be better to use an original sequence from the alignment for your search of the PDB. In this case you could chose the sequence with the highest identity to all others in your alignment by calculating the row-wise maximum from your sequence identity matrix. 
+
+```{r}
+#library(bio3d)
+POMC_blast <- blast.pdb("POMC.pdb")
+```
+
+```{r}
+POMC_table <- head(POMC_blast$hit.tbl, n=3)
+hits <- plot.blast(POMC_blast, cutoff = -13)
+write.csv(POMC_table, "POMC_top3_hits.csv")
+```
+
+```{r}
+top3_ids <- hits$pdb.id[1:3]
+
+# Download related pdb files
+files <- get.pdb(top3_ids, path = "pdbs", split = TRUE, gzip = TRUE)
+
+# Align related PDBs
+pdbs <- pdbaln(files, fit = TRUE)
+
+# Vector containing PDB codes for figure axis
+ids <- basename.pdb(pdbs$id)
+
+# Draw schematic alignment
+plot(pdbs, labels=ids)
+```
+
+```{r}
+top3_ids <- hits$pdb.id[1:3]
+top3_annot <- pdb.annotate(top3_ids)
+write.csv(top3_annot, "POMC_top3_annot.csv")
+```
+
+```{r}
+# Perform PCA
+top3_pca <- pca(pdbs)
+plot(top3_pca)
+
+# Calculate RMSD
+rmsd <- rmsd(pdbs)
+
+# Structure-based clustering
+hc.rmsd <- hclust(dist(rmsd))
+grps.rmsd <- cutree(hc.rmsd, k=3)
+
+plot(top3_pca, 1:2, col="grey50", bg=grps.rmsd, pch=21, cex=1)
+```
+
+```{r}
+# Visualize first principal component
+top3_pc1 <- mktrj(top3_pca, pc=1, file="POMC_top3_pc1.pdb")
+```
+
+
 
